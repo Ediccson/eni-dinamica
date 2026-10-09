@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#123b32">
+    <title>Nueva convocatoria | ENI</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --green-950: #123b32;
+            --green-800: #185847;
+            --green-600: #238363;
+            --green-100: #e8f4ef;
+            --ink: #192b27;
+            --muted: #687873;
+            --line: #dce6e1;
+            --surface: #ffffff;
+            --canvas: #f3f7f5;
+            --danger: #a63131;
+            --shadow: 0 24px 60px rgba(18, 59, 50, 0.09);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            min-width: 320px;
+            margin: 0;
+            background:
+                radial-gradient(ellipse at 90% 0%, rgba(176, 220, 201, 0.35), transparent 38rem),
+                var(--canvas);
+            color: var(--ink);
+            font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+            line-height: 1.5;
+        }
+
+        a { color: inherit; }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 76px;
+            padding: 0 clamp(1.25rem, 6vw, 6rem);
+            border-bottom: 1px solid rgba(220, 230, 225, 0.8);
+            background: rgba(255, 255, 255, 0.84);
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--green-950);
+            font-size: 1.05rem;
+            font-weight: 750;
+            text-decoration: none;
+        }
+
+        .brand-mark {
+            display: grid;
+            width: 38px;
+            height: 38px;
+            place-items: center;
+            border-radius: 12px;
+            background: var(--green-100);
+            color: var(--green-800);
+            font-size: 1.25rem;
+        }
+
+        .back-link {
+            color: var(--green-800);
+            font-size: 0.92rem;
+            font-weight: 650;
+            text-decoration: none;
+        }
+
+        .back-link:hover { color: var(--green-600); }
+
+        main {
+            width: min(1080px, calc(100% - 2.5rem));
+            margin: clamp(2.5rem, 6vw, 5rem) auto;
+        }
+
+        .intro { margin-bottom: 2rem; }
+
+        .eyebrow {
+            margin: 0 0 0.6rem;
+            color: var(--green-600);
+            font-size: 0.76rem;
+            font-weight: 800;
+            letter-spacing: 0.13em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0;
+            color: var(--green-950);
+            font-size: clamp(2rem, 5vw, 3.1rem);
+            letter-spacing: -0.045em;
+            line-height: 1.1;
+        }
+
+        .intro p:last-child {
+            max-width: 620px;
+            margin: 0.9rem 0 0;
+            color: var(--muted);
+            font-size: 1.03rem;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 280px;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        .form-card, .side-card {
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            background: var(--surface);
+            box-shadow: var(--shadow);
+        }
+
+        .form-card { padding: clamp(1.25rem, 4vw, 2.25rem); }
+
+        .form-heading {
+            margin: 0 0 0.35rem;
+            font-size: 1.2rem;
+            font-weight: 750;
+        }
+
+        .form-subheading {
+            margin: 0 0 1.75rem;
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .field-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1.25rem;
+        }
+
+        .field { min-width: 0; }
+        .field-full { grid-column: 1 / -1; }
+
+        label {
+            display: block;
+            margin-bottom: 0.45rem;
+            color: var(--ink);
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .required { color: var(--green-600); }
+
+        input, textarea {
+            width: 100%;
+            border: 1px solid #cfdcd6;
+            border-radius: 10px;
+            outline: none;
+            background: #fff;
+            color: var(--ink);
+            font: inherit;
+            transition: border-color 160ms ease, box-shadow 160ms ease;
+        }
+
+        input { min-height: 48px; padding: 0.7rem 0.85rem; }
+        textarea { min-height: 148px; padding: 0.8rem 0.85rem; resize: vertical; }
+
+        input:focus, textarea:focus {
+            border-color: var(--green-600);
+            box-shadow: 0 0 0 4px rgba(35, 131, 99, 0.12);
+        }
+
+        input:invalid:not(:placeholder-shown), textarea:invalid:not(:placeholder-shown) {
+            border-color: #d88a8a;
+        }
+
+        .hint {
+            display: block;
+            margin-top: 0.4rem;
+            color: var(--muted);
+            font-size: 0.8rem;
+        }
+
+        .form-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 1.75rem;
+            padding-top: 1.4rem;
+            border-top: 1px solid #edf1ef;
+        }
+
+        .button {
+            display: inline-flex;
+            min-height: 46px;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1.15rem;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            font: inherit;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: background 160ms ease, transform 160ms ease;
+        }
+
+        .button:hover { transform: translateY(-1px); }
+        .button-secondary { border-color: var(--line); background: white; color: var(--ink); }
+        .button-secondary:hover { background: #f7faf8; }
+        .button-primary { background: var(--green-800); color: white; }
+        .button-primary:hover { background: var(--green-950); }
+        .button-primary:disabled { cursor: wait; opacity: 0.7; transform: none; }
+
+        .side-card {
+            padding: 1.35rem;
+            box-shadow: 0 12px 32px rgba(18, 59, 50, 0.06);
+        }
+
+        .side-icon {
+            display: grid;
+            width: 44px;
+            height: 44px;
+            place-items: center;
+            margin-bottom: 1rem;
+            border-radius: 14px;
+            background: var(--green-100);
+            color: var(--green-800);
+            font-size: 1.35rem;
+        }
+
+        .side-card h2 { margin: 0 0 0.55rem; font-size: 1rem; }
+        .side-card p { margin: 0; color: var(--muted); font-size: 0.88rem; }
+
+        .steps {
+            display: grid;
+            gap: 0.85rem;
+            margin: 1.25rem 0 0;
+            padding: 1.1rem 0 0;
+            border-top: 1px solid #edf1ef;
+            list-style: none;
+        }
+
+        .steps li {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            color: var(--muted);
+            font-size: 0.84rem;
+        }
+
+        .step-number {
+            display: grid;
+            width: 24px;
+            height: 24px;
+            flex: 0 0 24px;
+            place-items: center;
+            border-radius: 50%;
+            background: var(--green-100);
+            color: var(--green-800);
+            font-size: 0.75rem;
+            font-weight: 800;
+        }
+
+        .notice {
+            display: none;
+            margin-bottom: 1.25rem;
+            padding: 0.9rem 1rem;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+
+        .notice.visible { display: block; }
+        .notice.success { border-color: #b9ddc9; background: #eff9f2; color: #205d39; }
+        .notice.error { border-color: #edc4c4; background: #fff4f4; color: var(--danger); }
+
+        @media (max-width: 760px) {
+            .layout { grid-template-columns: 1fr; }
+            .side-card { order: -1; }
+            .side-icon { display: none; }
+            .steps { grid-template-columns: repeat(3, 1fr); }
+            .steps li { align-items: flex-start; }
+        }
+
+        @media (max-width: 520px) {
+            .topbar { min-height: 66px; padding-inline: 1rem; }
+            .brand { font-size: 0.92rem; }
+            .back-link { font-size: 0.82rem; }
+            main { width: min(100% - 1.5rem, 1080px); margin-block: 2rem; }
+            .field-grid { grid-template-columns: 1fr; }
+            .field-full { grid-column: auto; }
+            .steps { grid-template-columns: 1fr; }
+            .form-actions { flex-direction: column-reverse; }
+            .form-actions .button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand" href="index.html">
+            <span class="brand-mark" aria-hidden="true">✳</span>
+            ENI <span>Convocatorias</span>
+        </a>
+        <a class="back-link" href="index.html">← Volver al inicio</a>
+    </header>
+
+    <main>
+        <section class="intro" aria-labelledby="page-title">
+            <p class="eyebrow">Panel de gestión · ENI</p>
+            <h1 id="page-title">Crear convocatoria</h1>
+            <p>Completa los datos para publicar una nueva convocatoria. Los campos con asterisco son obligatorios.</p>
+        </section>
+
+        <div class="layout">
+            <section class="form-card" aria-labelledby="form-title">
+                <h2 class="form-heading" id="form-title">Información de la convocatoria</h2>
+                <p class="form-subheading">Define el nombre, los detalles y el periodo de vigencia.</p>
+
+                <div id="formNotice" class="notice" role="status" aria-live="polite"></div>
+
+                <form id="convocatoriaForm">
+                    <div class="field-grid">
+                        <div class="field field-full">
+                            <label for="nombre">Nombre de la convocatoria <span class="required">*</span></label>
+                            <input id="nombre" name="nombre" type="text" maxlength="100" required
+                                   placeholder="Ej. Programa de capacitación digital">
+                            <span class="hint">Máximo 100 caracteres.</span>
+                        </div>
+
+                        <div class="field field-full">
+                            <label for="descripcion">Descripción <span class="required">*</span></label>
+                            <textarea id="descripcion" name="descripcion" required
+                                      placeholder="Describe el objetivo, los requisitos y la información relevante..."></textarea>
+                        </div>
+
+                        <div class="field">
+                            <label for="fecha_inicio">Fecha de inicio <span class="required">*</span></label>
+                            <input id="fecha_inicio" name="fecha_inicio" type="date" required>
+                        </div>
+
+                        <div class="field">
+                            <label for="fecha_fin">Fecha de cierre <span class="required">*</span></label>
+                            <input id="fecha_fin" name="fecha_fin" type="date" required>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a class="button button-secondary" href="index.html">Cancelar</a>
+                        <button class="button button-primary" id="submitButton" type="submit">
+                            <span aria-hidden="true">＋</span> Registrar convocatoria
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <aside class="side-card">
+                <div class="side-icon" aria-hidden="true">✓</div>
+                <h2>Antes de publicar</h2>
+                <p>Verifica que la información sea clara y que las fechas correspondan al periodo de recepción de postulaciones.</p>
+                <ol class="steps">
+                    <li><span class="step-number">1</span> Completa los datos</li>
+                    <li><span class="step-number">2</span> Revisa el periodo</li>
+                    <li><span class="step-number">3</span> Registra la convocatoria</li>
+                </ol>
+            </aside>
+        </div>
+    </main>
+
+    <script>
+        const SUPABASE_URL = 'https://ycwtqegcgmbfvbtcckrd.supabase.co';
+        const SUPABASE_API_KEY = 'sb_publishable_Q2B3tXEivjxJBwNKqK58kA_rJ2yXN9E';
+        const form = document.getElementById('convocatoriaForm');
+        const nameField = document.getElementById('nombre');
+        const descriptionField = document.getElementById('descripcion');
+        const startDateField = document.getElementById('fecha_inicio');
+        const endDateField = document.getElementById('fecha_fin');
+        const submitButton = document.getElementById('submitButton');
+        const notice = document.getElementById('formNotice');
+
+        function showNotice(message, type) {
+            notice.textContent = message;
+            notice.className = `notice visible ${type}`;
+        }
+
+        function syncDateLimits() {
+            endDateField.min = startDateField.value || '';
+            startDateField.max = endDateField.value || '';
+            endDateField.setCustomValidity(
+                startDateField.value && endDateField.value && endDateField.value < startDateField.value
+                    ? 'La fecha de cierre debe ser igual o posterior a la fecha de inicio.'
+                    : ''
+            );
+        }
+
+        startDateField.addEventListener('change', syncDateLimits);
+        endDateField.addEventListener('change', syncDateLimits);
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            syncDateLimits();
+
+            if (!form.reportValidity()) return;
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'Registrando...';
+            notice.className = 'notice';
+
+            const convocatoria = {
+                nombre: nameField.value.trim(),
+                descripcion: descriptionField.value.trim(),
+                fecha_inicio: startDateField.value,
+                fecha_fin: endDateField.value
+            };
+
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/convocatorias`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_API_KEY,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify(convocatoria)
+                });
+
+                const responseText = await response.text();
+                let result = null;
+                if (responseText) {
+                    try {
+                        result = JSON.parse(responseText);
+                    } catch {
+                        throw new Error(`El servidor devolvió una respuesta no válida (HTTP ${response.status}).`);
+                    }
+                }
+
+                if (!response.ok) {
+                    if (result && result.code === 'PGRST205') {
+                        throw new Error('La tabla public.convocatorias todavía no existe en Supabase. Ejecuta supabase_convocatorias.sql en el SQL Editor del proyecto.');
+                    }
+                    const detail = result && typeof result === 'object'
+                        ? [result.message, result.details, result.hint].filter(Boolean).join(' ')
+                        : '';
+                    throw new Error(detail || `No se pudo registrar la convocatoria (HTTP ${response.status}).`);
+                }
+
+                form.reset();
+                syncDateLimits();
+                showNotice('Convocatoria registrada correctamente.', 'success');
+            } catch (error) {
+                console.error('Error al registrar la convocatoria:', error);
+                showNotice(
+                    error instanceof TypeError
+                        ? 'No fue posible conectar con Supabase. Verifica tu conexión a Internet e inténtalo de nuevo.'
+                        : error.message,
+                    'error'
+                );
+            } finally {
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<span aria-hidden="true">＋</span> Registrar convocatoria';
+            }
+        });
+    </script>
+</body>
+</html>

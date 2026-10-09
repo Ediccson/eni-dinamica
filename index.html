@@ -1,1 +1,360 @@
-<!-- Placeholder: index.html content will be supplied in next commit if initial commit works -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capacitaciones - Consumo API Supabase</title>
+
+    <!-- Bootstrap 5 (opcional, para estilos) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        body {
+            background: #f4f7fa;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            padding: 2rem 1rem;
+        }
+
+        .container-api {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header-api {
+            background: linear-gradient(135deg, #1e7a3c 0%, #0f5429 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 25px rgba(30, 122, 60, 0.2);
+        }
+
+        .header-api h1 {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-capacitacion {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            height: 100%;
+            border-left: 4px solid #1e7a3c;
+        }
+
+        .card-capacitacion:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-capacitacion h5 {
+            color: #1e7a3c;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .card-capacitacion .campo {
+            font-size: 0.9rem;
+            color: #4a5e4d;
+            margin-bottom: 0.4rem;
+        }
+
+        .card-capacitacion .campo strong {
+            color: #1b2e1f;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #1e7a3c;
+            font-size: 1.2rem;
+        }
+
+        .error-box {
+            background: #fff3f3;
+            border-left: 4px solid #dc3545;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            color: #721c24;
+        }
+
+        .empty-box {
+            background: #fff9e6;
+            border-left: 4px solid #f5b800;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            color: #664d03;
+        }
+
+        .badge-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.4rem 1rem;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .btn-recargar {
+            background: white;
+            color: #1e7a3c;
+            border: none;
+            font-weight: 600;
+            padding: 0.6rem 1.5rem;
+            border-radius: 50px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-recargar:hover {
+            background: #f5b800;
+            color: #1b2e1f;
+            transform: translateY(-2px);
+        }
+
+        .json-view {
+            background: #1b2e1f;
+            color: #a8e6a8;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            max-height: 400px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container-api">
+
+        <!-- Encabezado -->
+        <div class="header-api d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div>
+                <h1><i class="bi bi-database-check me-2"></i>Capacitaciones ENI</h1>
+                <p class="mb-0 opacity-75">Datos obtenidos desde Supabase REST API</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge-count" id="contador">Cargando...</span>
+                <a class="btn-recargar text-decoration-none" href="formulario_convocatoria.html">
+                    <i class="bi bi-plus-circle me-1"></i> Nueva convocatoria
+                </a>
+                <a class="btn-recargar text-decoration-none" href="formulario_capacitacion.html">
+                    <i class="bi bi-mortarboard me-1"></i> Nueva capacitación
+                </a>
+                <button class="btn-recargar" onclick="cargarCapacitaciones()">
+                    <i class="bi bi-arrow-clockwise me-1"></i> Recargar
+                </button>
+            </div>
+        </div>
+
+        <!-- Estados de la petición -->
+        <div id="estadoCarga" class="loading">
+            <div class="spinner-border text-success mb-3" role="status"></div>
+            <p>Cargando capacitaciones...</p>
+        </div>
+
+        <div id="estadoError" class="error-box d-none">
+            <h5><i class="bi bi-exclamation-triangle-fill me-2"></i>Error al cargar los datos</h5>
+            <p id="mensajeError" class="mb-0"></p>
+        </div>
+
+        <div id="estadoVacio" class="empty-box d-none">
+            <h5><i class="bi bi-inbox me-2"></i>No hay capacitaciones</h5>
+            <p class="mb-0">La API respondió correctamente pero no devolvió registros.</p>
+        </div>
+
+        <!-- Contenedor de tarjetas -->
+        <div class="row g-4" id="contenedorCapacitaciones"></div>
+
+        <!-- Vista del JSON crudo (debug) -->
+        <details class="mt-4">
+            <summary class="fw-bold" style="cursor: pointer; color: #1e7a3c;">
+                <i class="bi bi-code-square me-1"></i> Ver respuesta JSON cruda (debug)
+            </summary>
+            <pre class="json-view mt-3" id="jsonRaw">Esperando datos...</pre>
+        </details>
+
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- JAVASCRIPT: CONSUMO DE API CON FETCH Y ASYNC/AWAIT        -->
+    <!-- ========================================================= -->
+    <script>
+        // =====================================================
+        // CONFIGURACIÓN DE LA API
+        // =====================================================
+        const API_URL = 'https://ycwtqegcgmbfvbtcckrd.supabase.co/rest/v1/capacitaciones?select=*';
+        
+        // Pega aquí la clave anon/publishable vigente de este proyecto,
+        // desde Supabase > Settings > API Keys. No uses la service_role en el navegador.
+        const API_KEY = 'sb_publishable_Q2B3tXEivjxJBwNKqK58kA_rJ2yXN9E';
+        
+
+        // =====================================================
+        // REFERENCIAS AL DOM
+        // =====================================================
+        const estadoCarga = document.getElementById('estadoCarga');
+        const estadoError = document.getElementById('estadoError');
+        const estadoVacio = document.getElementById('estadoVacio');
+        const mensajeError = document.getElementById('mensajeError');
+        const contenedor = document.getElementById('contenedorCapacitaciones');
+        const contador = document.getElementById('contador');
+        const jsonRaw = document.getElementById('jsonRaw');
+
+        // =====================================================
+        // FUNCIÓN ASÍNCRONA PRINCIPAL
+        // =====================================================
+        async function cargarCapacitaciones() {
+            // 1. Reiniciar estados de la UI
+            mostrarEstado('cargando');
+
+            try {
+                // 2. Realizar la petición fetch con los headers requeridos
+                if (!API_KEY.trim()) {
+                    throw new Error('Configura API_KEY con la clave anon/publishable vigente del proyecto en Supabase.');
+                }
+
+                const respuesta = await fetch(API_URL, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': API_KEY,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                // 3. Verificar si la respuesta fue exitosa (status 200-299)
+                if (!respuesta.ok) {
+                    const detalle = await respuesta.text();
+                    throw new Error(`Error HTTP ${respuesta.status}: ${detalle || respuesta.statusText}`);
+                }
+
+                // 4. Convertir la respuesta a JSON
+                const datos = await respuesta.json();
+
+                // 5. Mostrar el JSON crudo para debug
+                jsonRaw.textContent = JSON.stringify(datos, null, 2);
+
+                // 6. Validar si hay datos
+                if (!Array.isArray(datos) || datos.length === 0) {
+                    mostrarEstado('vacio');
+                    contador.textContent = '0 registros';
+                    return;
+                }
+
+                // 7. Renderizar los datos en el DOM
+                renderizarCapacitaciones(datos);
+                contador.textContent = `${datos.length} registro${datos.length !== 1 ? 's' : ''}`;
+                mostrarEstado('exito');
+
+                console.log('✅ Datos cargados correctamente:', datos);
+
+            } catch (error) {
+                // Manejo de errores
+                console.error('❌ Error al consumir la API:', error);
+                mensajeError.textContent = error.message || 'Error desconocido al conectar con la API.';
+                contador.textContent = 'Error';
+                mostrarEstado('error');
+                jsonRaw.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        // =====================================================
+        // FUNCIÓN PARA RENDERIZAR LAS TARJETAS
+        // =====================================================
+        function renderizarCapacitaciones(capacitaciones) {
+            contenedor.innerHTML = ''; // Limpiar contenedor
+
+            capacitaciones.forEach((item) => {
+                // Crear columna Bootstrap
+                const col = document.createElement('div');
+                col.className = 'col-md-6 col-lg-4';
+
+                // Detectar dinámicamente los campos del objeto
+                // (por si la tabla tiene columnas variables)
+                const camposHTML = Object.entries(item)
+                    .filter(([key, value]) => {
+                        // Excluir campos nulos, vacíos o de sistema
+                        if (value === null || value === undefined || value === '') return false;
+                        // Evitar mostrar IDs largos o timestamps si no son relevantes
+                        return true;
+                    })
+                    .map(([key, value]) => {
+                        // Formatear el nombre del campo (reemplazar _ por espacio, capitalizar)
+                        const nombreCampo = key
+                            .replace(/_/g, ' ')
+                            .replace(/\b\w/g, l => l.toUpperCase());
+
+                        // Formatear el valor si es un objeto o array
+                        let valorFormateado = value;
+                        if (typeof value === 'object') {
+                            valorFormateado = JSON.stringify(value);
+                        }
+
+                        return `
+                            <div class="campo">
+                                <strong>${nombreCampo}:</strong> ${valorFormateado}
+                            </div>
+                        `;
+                    })
+                    .join('');
+
+                // Título: buscar el primer campo que parezca nombre/título
+                const titulo = item.nombre 
+                    || item.titulo 
+                    || item.nombre_capacitacion 
+                    || item.descripcion 
+                    || `Capacitación #${item.id || 'N/A'}`;
+
+                col.innerHTML = `
+                    <div class="card-capacitacion">
+                        <h5><i class="bi bi-book-fill me-2"></i>${titulo}</h5>
+                        ${camposHTML}
+                    </div>
+                `;
+
+                contenedor.appendChild(col);
+            });
+        }
+
+        // =====================================================
+        // FUNCIÓN AUXILIAR PARA CAMBIAR ESTADOS DE LA UI
+        // =====================================================
+        function mostrarEstado(estado) {
+            // Ocultar todos primero
+            estadoCarga.classList.add('d-none');
+            estadoError.classList.add('d-none');
+            estadoVacio.classList.add('d-none');
+            contenedor.innerHTML = contenedor.innerHTML; // mantener
+
+            switch (estado) {
+                case 'cargando':
+                    estadoCarga.classList.remove('d-none');
+                    contenedor.innerHTML = '';
+                    break;
+                case 'error':
+                    estadoError.classList.remove('d-none');
+                    contenedor.innerHTML = '';
+                    break;
+                case 'vacio':
+                    estadoVacio.classList.remove('d-none');
+                    contenedor.innerHTML = '';
+                    break;
+                case 'exito':
+                    // Todo se muestra normal
+                    break;
+            }
+        }
+
+        // =====================================================
+        // EJECUCIÓN AUTOMÁTICA AL CARGAR LA PÁGINA
+        // =====================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarCapacitaciones();
+        });
+    </script>
+
+</body>
+</html>
